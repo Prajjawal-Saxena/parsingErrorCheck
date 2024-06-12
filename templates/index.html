@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parsing Error Identification</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        header {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        .btn {
+            border: 2px solid #007bff;
+            color: white;
+            background-color: #007bff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        .results {
+            margin-top: 20px;
+            width: 100%;
+        }
+        .results textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Parsing Error Identification
+</header>
+
+<div class="container">
+    <form id="upload-form" enctype="multipart/form-data">
+        <div class="upload-btn-wrapper">
+            <button class="btn">Upload File</button>
+            <input type="file" name="file" id="file-input">
+        </div>
+    </form>
+    <button class="btn" id="check-error-btn">Check Parsing Error</button>
+    <div class="results">
+        <textarea id="results" readonly placeholder="Parsing errors will be displayed here..."></textarea>
+    </div>
+</div>
+
+<script>
+    document.getElementById('check-error-btn').addEventListener('click', function() {
+        var formData = new FormData(document.getElementById('upload-form'));
+        fetch('/check_parsing_error', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('results').innerHTML = data.errors.join('\n');
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+
+</body>
+</html>
