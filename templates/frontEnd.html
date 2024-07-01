@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parsing Error Identification</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        header {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .actions {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            margin-right: 20px;
+        }
+        .btn {
+            border: 2px solid #007bff;
+            color: white;
+            background-color: #007bff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+        .results {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            width: 100%;
+            justify-content: center;
+        }
+        .results-box {
+            width: 80%;
+            height: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #007bff;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .results textarea {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            border: none;
+            resize: none;
+        }
+        .message {
+            margin-top: 10px;
+            color: green;
+            font-size: 14px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    Parsing Error Identification
+</header>
+
+<div class="container">
+    <form id="upload-form" enctype="multipart/form-data">
+        <div class="actions">
+            <div class="upload-btn-wrapper">
+                <button class="btn">Upload File</button>
+                <input type="file" name="file" id="file-input">
+            </div>
+            <button type="button" class="btn" id="check-error-btn">Check Parsing Error</button>
+        </div>
+    </form>
+    <div class="message" id="upload-message">File uploaded successfully!</div>
+</div>
+
+<div class="results">
+    <div class="results-box">
+        <textarea id="results" readonly placeholder="Parsing errors will be displayed here..."></textarea>
+    </div>
+</div>
+
+<script>
+    document.getElementById('file-input').addEventListener('change', function() {
+        var message = document.getElementById('upload-message');
+        message.style.display = 'block';
+        setTimeout(function() {
+            message.style.display = 'none';
+        }, 3000); // Hide the message after 3 seconds
+    });
+
+    document.getElementById('check-error-btn').addEventListener('click', function() {
+        var formData = new FormData(document.getElementById('upload-form'));
+        fetch('/check_parsing_error', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            let errorText = data.errors.map(error => error + '\n').join('\n');
+            if (data.total > 1) {
+                errorText += `\n\nTotal number of errors found: ${data.total}`;
+            }
+            document.getElementById('results').value = errorText;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('results').value = 'An error occurred: ' + error.message;
+        });
+    });
+</script>
+
+</body>
+</html>
